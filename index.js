@@ -128,6 +128,13 @@ async function run() {
       const result = await orderCollection.deleteOne(query);
       res.json(result);
     });
+    // DELETE Products
+    app.delete('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
+      res.json(result);
+    });
     // GET ALL ORDER
     app.get('/orders', async (req, res) => {
       const cursor = orderCollection.find({});
