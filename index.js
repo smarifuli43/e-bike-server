@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
+const ObjectId = require('mongodb').ObjectId;
+
+
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -25,6 +28,8 @@ async function run() {
     const database = client.db('ebike');
     const productsCollection = database.collection('products');
     const usersCollection = database.collection('users');
+    const reviewsCollection = database.collection('reviews');
+    const orderCollection = database.collection('orders');
 
     // GET ALL PRODUCTS API
     app.get('/products', async (req, res) => {
@@ -38,6 +43,13 @@ async function run() {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
       res.json(result);
+    });
+    // GET SINGLE productAPI
+    app.get('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const product = await productsCollection.findOne(query);
+      res.json(product);
     });
 
     //post users
@@ -79,6 +91,35 @@ async function run() {
         isAdmin = true;
       }
       res.json({ admin: isAdmin });
+    });
+
+    // Post REVIEW
+    app.post('/reviews', async (req, res) => {
+      const review = req.body;
+      const result = await reviewsCollection.insertOne(review);
+      res.json(result);
+    });
+
+    // get all review
+    app.get('/reviews', async (req, res) => {
+      const cursor = reviewsCollection.find({});
+      const reviews = await cursor.toArray();
+      res.send(reviews);
+    });
+
+    //  POST Order INFO
+    app.post('/orders', async (req, res) => {
+      const orders = req.body;
+      const result = await orderCollection.insertOne(orders);
+      res.json(result);
+    });
+    // GET MY ORDER
+    app.get('/orders', async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = orderCollection.find(query);
+      const orders = await cursor.toArray();
+      res.json(orders);
     });
   } finally {
     // await client.close()
